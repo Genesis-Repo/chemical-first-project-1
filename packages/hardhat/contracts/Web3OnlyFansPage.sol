@@ -10,12 +10,8 @@ contract Web3OnlyFansPage is Ownable, ERC721Enumerable {
     
     mapping(uint256 => address) private _tokenCreators;
     mapping(address => bool) private _approvedCreators;
-    mapping(uint256 => bool) private _tokenSubscribers;
-    mapping(uint256 => address) private _approvedTokenHolders;
 
     event TokenCreated(address indexed creator, uint256 tokenId);
-    event Subscription(address indexed subscriber, uint256 tokenId);
-    event TokenTransferred(uint256 tokenId, address indexed from, address indexed to);
 
     constructor(string memory name, string memory symbol, string memory baseTokenURI_) ERC721(name, symbol) {
         _baseTokenURI = baseTokenURI_;
@@ -43,36 +39,8 @@ contract Web3OnlyFansPage is Ownable, ERC721Enumerable {
         _approvedCreators[creator] = false;
     }
 
-    function subscribe(uint256 tokenId) external {
-        require(_exists(tokenId), "Token does not exist");
-        _tokenSubscribers[tokenId] = true;
-
-        emit Subscription(msg.sender, tokenId);
-    }
-
-    function isSubscriber(uint256 tokenId) public view returns(bool) {
-        return _tokenSubscribers[tokenId];
-    }
-
     function tokenCreator(uint256 tokenId) public view returns(address) {
         return _tokenCreators[tokenId];
-    }
-
-    function transferFrom(address from, address to, uint256 tokenId) public override {
-        require(_msgSender() == owner() || _approvedTokenHolders[tokenId] == _msgSender(), "Transfer not allowed");
-        super.transferFrom(from, to, tokenId);
-
-        emit TokenTransferred(tokenId, from, to);
-    }
-
-    function approveTokenHolder(uint256 tokenId, address holder) external {
-        require(_msgSender() == owner(), "Only contract owner can approve token holders");
-        _approvedTokenHolders[tokenId] = holder;
-    }
-
-    function revokeTokenHolder(uint256 tokenId) external {
-        require(_msgSender() == owner(), "Only contract owner can revoke token holders");
-        _approvedTokenHolders[tokenId] = address(0);
     }
 
     function _baseURI() internal view override returns (string memory) {
