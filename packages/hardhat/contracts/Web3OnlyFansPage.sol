@@ -10,8 +10,10 @@ contract Web3OnlyFansPage is Ownable, ERC721Enumerable {
     
     mapping(uint256 => address) private _tokenCreators;
     mapping(address => bool) private _approvedCreators;
+    mapping(uint256 => bool) private _tokenSubscribers;
 
     event TokenCreated(address indexed creator, uint256 tokenId);
+    event Subscription(address indexed subscriber, uint256 tokenId);
 
     constructor(string memory name, string memory symbol, string memory baseTokenURI_) ERC721(name, symbol) {
         _baseTokenURI = baseTokenURI_;
@@ -37,6 +39,17 @@ contract Web3OnlyFansPage is Ownable, ERC721Enumerable {
 
     function revokeCreator(address creator) external onlyOwner {
         _approvedCreators[creator] = false;
+    }
+
+    function subscribe(uint256 tokenId) external {
+        require(_exists(tokenId), "Token does not exist");
+        _tokenSubscribers[tokenId] = true;
+
+        emit Subscription(msg.sender, tokenId);
+    }
+
+    function isSubscriber(uint256 tokenId) public view returns(bool) {
+        return _tokenSubscribers[tokenId];
     }
 
     function tokenCreator(uint256 tokenId) public view returns(address) {
